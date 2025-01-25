@@ -19,8 +19,18 @@ RUN npm run build
 # Step 7: Use a lightweight web server to serve the app
 FROM nginx:stable-alpine
 
-# Step 8: Copy the build output to the web server directory
-COPY --from=builder /app/dist /usr/share/nginx/html
+# Set working directory inside nginx
+
+WORKDIR /usr/share/nginx/html
+
+# Remove default Nginx static assets (if any)
+RUN rm -rf ./*
+
+# Copy built files from the Node.js builder stage
+COPY --from=builder /app/dist .
+
+# Copy custom Nginx configuration
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 # Step 9: Expose the appropriate port
 EXPOSE 80
